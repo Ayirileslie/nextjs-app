@@ -18,12 +18,18 @@ export default function Home() {
         body: JSON.stringify({ url }),
       });
 
-      if (!res.ok) throw new Error("Failed to fetch data");
+      // If the response is not ok, display the error message
+      if (!res.ok) {
+        const errorData = await res.text(); // Get the error text for more details
+        throw new Error(`Failed to fetch data: ${errorData}`);
+      }
 
+      // Parse the response and access the summary part
       const data = await res.json();
-      setResponse(data?.result || "No result received from API");
+      const summaryText = data?.summary?.parts?.[0]?.text || "No result received from API";
+      setResponse(summaryText);
     } catch (error) {
-      setResponse("Error processing the URL");
+      setResponse(`Error processing the URL: ${error.message}`);
       console.error("Fetch error:", error);
     } finally {
       setLoading(false);
