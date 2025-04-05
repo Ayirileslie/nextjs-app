@@ -7,34 +7,37 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setResponse(""); // Reset response before making request
+  e.preventDefault();
+  setLoading(true);
+  setResponse(""); // Reset response before making request
 
-    try {
-      const res = await fetch("https://fast-api-newsummarizer.onrender.com/process_url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
+  try {
+    const res = await fetch("https://fast-api-newsummarizer.onrender.com/process_url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
 
-      // If the response is not ok, display the error message
-      if (!res.ok) {
-        const errorData = await res.text(); // Get the error text for more details
-        throw new Error(`Failed to fetch data: ${errorData}`);
-      }
+    console.log("Raw response:", res);
 
-      // Parse the response and access the summary part
-      const data = await res.json();
-      const summaryText = data?.summary?.parts?.[0]?.text || "No result received from API";
-      setResponse(summaryText);
-    } catch (error) {
-      setResponse(`Error processing the URL: ${error.message}`);
-      console.error("Fetch error:", error);
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      const errorData = await res.text();
+      throw new Error(`Failed to fetch data: ${errorData}`);
     }
-  };
+
+    const data = await res.json();
+    console.log("Parsed data:", data);
+
+    // More robust check to ensure we get expected response
+    const summaryText = data?.summary?.parts?.[0]?.text ?? "No valid summary received";
+    setResponse(summaryText);
+  } catch (error) {
+    setResponse(`Error processing the URL: ${error.message}`);
+    console.error("Fetch error:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="container">
